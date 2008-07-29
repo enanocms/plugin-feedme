@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: RSS Backend
-Plugin URI: http://enano.homelinux.org/Feed_me
+Plugin Name: RSS Frontend
+Plugin URI: http://enanocms.org/Feed_me
 Description: Provides the page Special:RSS, which is used to generate RSS feeds of site and page content changes.
 Author: Dan Fuhry
 Version: 1.0
-Author URI: http://enano.homelinux.org/
+Author URI: http://enanocms.org/
 */
 
 /*
@@ -134,6 +134,7 @@ class RSS
     $guid = md5(microtime() . mt_rand());
     $this->channels[$guid] = Array(
         'title' => $title,
+        'desc' => $desc,
         'link' => $link,
         'gen' => $gen,
         'email' => $email,
@@ -236,9 +237,15 @@ class RSS
 
 // function names are IMPORTANT!!! The name pattern is: page_<namespace ID>_<page URLname, without namespace>
 
-function page_Special_RSS() {
+function page_Special_RSS()
+{
   global $db, $session, $paths, $template, $plugins; // Common objects
   header('Content-type: text/xml; charset=windows-1252'); //application/rss+xml');
+  global $aggressive_optimize_html;
+  $aggressive_optimize_html = false;
+  $session->sid_super = false;
+  if ( $session->auth_level > USER_LEVEL_MEMBER )
+    $session->auth_level = USER_LEVEL_MEMBER;
   $mode = $paths->getParam(0);
   $n = $paths->getParam(1);
   if(!preg_match('#^([0-9]+)$#', $n) || (int)$n > 50) $n = 20;
@@ -246,7 +253,6 @@ function page_Special_RSS() {
   switch($mode)
   {
     case "recent":
-    case false:
       $title = getConfig('site_name') . ' Recent Changes';
       $desc = getConfig('site_desc');
       
@@ -261,11 +267,12 @@ function page_Special_RSS() {
       {
         while($row = $db->fetchrow())
         {
-          $link = 'http' . ( isset($_SERVER['HTTPS']) ? 's' : '' ) . '://'.$_SERVER['HTTP_HOST'] . makeUrlNS($row['namespace'], $row['page_id']);
+          $link = makeUrlComplete($row['namespace'], $row['page_id'], "oldid={$row['time_id']}"); // makeUrlComplete($row['namespace'], $row['page_id']);
           $title = $paths->pages[$paths->nslist[$row['namespace']].$row['page_id']]['name'];
-          $desc = ( $row['edit_summary'] != '' ) ? $row['edit_summary'] : 'No edit summary given.';
+          $desc = "Change by {$row['author']}:<br />";
+          $desc .= ( $row['edit_summary'] != '' ) ? $row['edit_summary'] : 'No edit summary given.';
           $date = $row['time_id'];
-          $guid = 'http' . ( isset($_SERVER['HTTPS']) ? 's' : '' ) . '://'.$_SERVER['HTTP_HOST'] . makeUrlNS($row['namespace'], $row['page_id']).'?oldid='.$row['time_id'];
+          $guid = false;
           
           $rss->add_item($title, $link, $desc, $date, $guid);
         }
