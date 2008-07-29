@@ -240,7 +240,7 @@ class RSS
 function page_Special_RSS()
 {
   global $db, $session, $paths, $template, $plugins; // Common objects
-  header('Content-type: text/xml; charset=windows-1252'); //application/rss+xml');
+  header('Content-type: text/xml; charset=utf-8'); //application/rss+xml');
   global $aggressive_optimize_html;
   $aggressive_optimize_html = false;
   $session->sid_super = false;
