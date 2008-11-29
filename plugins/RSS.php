@@ -195,7 +195,7 @@ class RSS
         $desc
       </description>
       <pubDate>$pubdate</pubDate>
-      <guid>$guid</guid>
+      <guid>$link</guid>
     </item>";
     $this->this_channel['items'][] = $xml;
   }
