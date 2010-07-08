@@ -94,15 +94,6 @@ class RSS
     $this->create_channel($title, $desc, $link, $gen, $email);
   }
   
-  /**
-   * PHP 4 constructor.
-   */
-  
-  function RSS($title = false, $desc = false, $link = false, $gen = false, $email = false)
-  {
-    $this->__construct($title, $desc, $link, $gen, $email);
-  }
-  
   /** 
    * Creates a new channel.
    */
@@ -174,7 +165,7 @@ class RSS
     $title = htmlspecialchars($title);
     $link = htmlspecialchars($link);
     $desc = '<![CDATA[ ' . str_replace(']]>', ']]&gt;', $desc) . ']]>';
-    if ( is_int($pubdate) || ( !is_int($pub_date) && preg_match('/^([0-9]+)$/', $pubdate) ) )
+    if ( is_int($pubdate) || ( !is_int($pubdate) && preg_match('/^([0-9]+)$/', $pubdate) ) )
     {
       $pubdate = date('D, d M Y H:i:s T', intval($pubdate));
     }
@@ -268,7 +259,7 @@ function page_Special_RSS()
         while($row = $db->fetchrow())
         {
           $link = makeUrlComplete($row['namespace'], $row['page_id'], "oldid={$row['time_id']}"); // makeUrlComplete($row['namespace'], $row['page_id']);
-          $title = $paths->pages[$paths->nslist[$row['namespace']].$row['page_id']]['name'];
+          $title = get_page_title_ns($row['page_id'], $row['namespace']); // $paths->pages[$paths->nslist[$row['namespace']].$row['page_id']]['name'];
           $desc = "Change by {$row['author']}:<br />";
           $desc .= ( $row['edit_summary'] != '' ) ? $row['edit_summary'] : 'No edit summary given.';
           $date = $row['time_id'];
